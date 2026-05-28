@@ -1,6 +1,8 @@
 // State Management
 let memos = JSON.parse(localStorage.getItem('classroom_memos')) || [];
 let currentMemoId = null;
+let selectedMood = '😊';
+let selectedTagColor = 'default';
 
 // DOM Elements
 const memoList = document.getElementById('memo-list');
@@ -13,6 +15,8 @@ const searchInput = document.getElementById('search-input');
 const newMemoBtn = document.getElementById('new-memo-btn');
 const saveMemoBtn = document.getElementById('save-memo-btn');
 const closeModalBtn = document.getElementById('close-modal-btn');
+const moodPicker = document.getElementById('mood-picker');
+const tagPicker = document.getElementById('tag-picker');
 
 // Initialization
 document.addEventListener('DOMContentLoaded', () => {
@@ -28,6 +32,26 @@ function setupEventListeners() {
     memoContentInput.addEventListener('input', updatePreview);
     searchInput.addEventListener('input', () => renderMemos(searchInput.value));
 
+    // Mood Picker logic
+    moodPicker.addEventListener('click', (e) => {
+        const btn = e.target.closest('.mood-btn');
+        if (btn) {
+            document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedMood = btn.dataset.mood;
+        }
+    });
+
+    // Tag Picker logic
+    tagPicker.addEventListener('click', (e) => {
+        const btn = e.target.closest('.tag-btn');
+        if (btn) {
+            document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedTagColor = btn.dataset.color;
+        }
+    });
+
     // Close modal on click outside
     editorModal.addEventListener('click', (e) => {
         if (e.target === editorModal) closeEditorModal();
@@ -40,8 +64,8 @@ function renderMemos(filter = '') {
     
     const filteredMemos = memos
         .filter(memo => 
-            memo.title.toLowerCase().includes(filter.toLowerCase()) || 
-            memo.content.toLowerCase().includes(filter.toLowerCase())
+            (memo.title || '').toLowerCase().includes(filter.toLowerCase()) || 
+            (memo.content || '').toLowerCase().includes(filter.toLowerCase())
         )
         .sort((a, b) => (a.order || 0) - (b.order || 0));
 
@@ -58,7 +82,6 @@ function renderMemos(filter = '') {
         });
     }
     
-    // Re-initialize icons for dynamic content
     if (window.lucide) {
         lucide.createIcons();
     }
@@ -70,12 +93,18 @@ function createMemoCard(memo) {
     card.draggable = true;
     card.dataset.id = memo.id;
     
-    // Marked parsing for preview in card
+    // Set tag color as CSS variable
+    const tagHex = getTagHex(memo.tagColor || 'default');
+    card.style.setProperty('--tag-color', tagHex);
+    
     const previewHtml = marked.parse(memo.content.substring(0, 150) + (memo.content.length > 150 ? '...' : ''));
 
     card.innerHTML = `
         <div class="memo-card-header">
-            <h3 class="memo-card-title">${memo.title || '無題のメモ'}</h3>
+            <div class="memo-card-title-group">
+                <span class="memo-mood-badge">${memo.mood || '😊'}</span>
+                <h3 class="memo-card-title">${memo.title || '無題のメモ'}</h3>
+            </div>
             <button class="btn-icon delete-btn" data-id="${memo.id}" title="削除">
                 <i data-lucide="trash-2"></i>
             </button>
@@ -84,35 +113,44 @@ function createMemoCard(memo) {
             ${previewHtml}
         </div>
         <div class="memo-card-footer">
-            <span>${new Date(memo.updatedAt).toLocaleDateString()}</span>
+            <span><span class="tag-dot"></span>${new Date(memo.updatedAt).toLocaleDateString()}</span>
             <i data-lucide="grip-vertical" class="grip-icon"></i>
         </div>
     `;
 
-    // Click to edit
     card.addEventListener('click', (e) => {
         if (!e.target.closest('.delete-btn')) {
             openEditMemoModal(memo.id);
         }
     });
 
-    // Delete button
     const deleteBtn = card.querySelector('.delete-btn');
     deleteBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         deleteMemo(memo.id);
     });
 
-    // Drag and Drop Events
     setupDragAndDrop(card);
 
     return card;
+}
+
+function getTagHex(colorName) {
+    const colors = {
+        'pink': '#ffcad4',
+        'mint': '#b9fbc0',
+        'sky': '#9bf6ff',
+        'lavender': '#e0c3fc',
+        'default': '#f1f5f9'
+    };
+    return colors[colorName] || colors.default;
 }
 
 function openNewMemoModal() {
     currentMemoId = null;
     memoTitleInput.value = '';
     memoContentInput.value = '';
+    resetMetaSelectors();
     updatePreview();
     editorModal.classList.remove('hidden');
     memoTitleInput.focus();
@@ -125,8 +163,31 @@ function openEditMemoModal(id) {
     currentMemoId = id;
     memoTitleInput.value = memo.title;
     memoContentInput.value = memo.content;
+    
+    // Set mood and tag from memo
+    selectedMood = memo.mood || '😊';
+    selectedTagColor = memo.tagColor || 'default';
+    updateMetaSelectors();
+    
     updatePreview();
     editorModal.classList.remove('hidden');
+}
+
+function resetMetaSelectors() {
+    selectedMood = '😊';
+    selectedTagColor = 'default';
+    updateMetaSelectors();
+}
+
+function updateMetaSelectors() {
+    // Update Mood buttons
+    document.querySelectorAll('.mood-btn').forEach(btn => {
+        btn.classList.toggle('selected', btn.dataset.mood === selectedMood);
+    });
+    // Update Tag buttons
+    document.querySelectorAll('.tag-btn').forEach(btn => {
+        btn.classList.toggle('selected', btn.dataset.color === selectedTagColor);
+    });
 }
 
 function closeEditorModal() {
@@ -143,19 +204,21 @@ function saveMemo() {
     const now = new Date().toISOString();
 
     if (currentMemoId) {
-        // Update
         memos = memos.map(m => m.id === currentMemoId ? {
             ...m,
             title,
             content,
+            mood: selectedMood,
+            tagColor: selectedTagColor,
             updatedAt: now
         } : m);
     } else {
-        // Create
         const newMemo = {
             id: Date.now().toString(),
             title: title || '無題のメモ',
             content,
+            mood: selectedMood,
+            tagColor: selectedTagColor,
             updatedAt: now,
             createdAt: now,
             order: memos.length
@@ -185,7 +248,7 @@ function updatePreview() {
     markdownPreview.innerHTML = marked.parse(content);
 }
 
-// Phase 3: Drag and Drop Logic
+// Drag and Drop Logic
 let draggedItem = null;
 
 function setupDragAndDrop(el) {
@@ -199,7 +262,6 @@ function setupDragAndDrop(el) {
         draggedItem = null;
         el.classList.remove('dragging');
         
-        // Update order in state and storage
         const cards = Array.from(memoList.querySelectorAll('.memo-card'));
         const newOrder = cards.map((card, index) => {
             const memoId = card.dataset.id;

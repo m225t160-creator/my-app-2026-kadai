@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Classroom Memo</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Google Fonts: Inter -->
+    <!-- Google Fonts: Inter & Quicksand -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Marked.js for Markdown -->
@@ -39,10 +39,10 @@
             </div>
             <div id="empty-state" class="empty-state hidden">
                 <div class="empty-icon-container">
-                    <i data-lucide="note-text" class="empty-icon"></i>
+                    <i data-lucide="sparkles" class="empty-icon"></i>
                 </div>
-                <h3>メモがありません</h3>
-                <p>「新規メモ」ボタンから新しいメモを作成しましょう。</p>
+                <h3>まだメモがないよ</h3>
+                <p>「新規メモ」ボタンから、はじめてのメモを書いてみよう！ ✨</p>
             </div>
         </main>
 
@@ -50,12 +50,36 @@
         <div id="editor-modal" class="modal hidden">
             <div class="modal-content">
                 <div class="modal-header">
-                    <input type="text" id="memo-title-input" placeholder="タイトルを入力..." class="title-input">
+                    <input type="text" id="memo-title-input" placeholder="タイトルをかいてね..." class="title-input">
                     <div class="modal-actions">
-                        <button id="close-modal-btn" class="btn btn-ghost">キャンセル</button>
-                        <button id="save-memo-btn" class="btn btn-primary">保存する</button>
+                        <button id="close-modal-btn" class="btn btn-ghost">やめる</button>
+                        <button id="save-memo-btn" class="btn btn-primary">ほぞんする</button>
                     </div>
                 </div>
+                
+                <div class="modal-meta">
+                    <div class="meta-section">
+                        <span>きぶん：</span>
+                        <div class="mood-picker" id="mood-picker">
+                            <button class="mood-btn selected" data-mood="😊" title="はっぴー">😊</button>
+                            <button class="mood-btn" data-mood="📝" title="しゅうちゅう">📝</button>
+                            <button class="mood-btn" data-mood="😐" title="ふつう">😐</button>
+                            <button class="mood-btn" data-mood="💤" title="ねむい">💤</button>
+                            <button class="mood-btn" data-mood="😰" title="おつかれ">😰</button>
+                        </div>
+                    </div>
+                    <div class="meta-section">
+                        <span>たぐ：</span>
+                        <div class="tag-picker" id="tag-picker">
+                            <button class="tag-btn selected" data-color="default" style="background: #e2e8f0;"></button>
+                            <button class="tag-btn" data-color="pink" style="background: #ffcad4;"></button>
+                            <button class="tag-btn" data-color="mint" style="background: #b9fbc0;"></button>
+                            <button class="tag-btn" data-color="sky" style="background: #9bf6ff;"></button>
+                            <button class="tag-btn" data-color="lavender" style="background: #e0c3fc;"></button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="modal-body">
                     <div class="editor-pane">
                         <div class="pane-header">編集 (Markdown)</div>
