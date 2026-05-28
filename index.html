@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classroom Memo</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Marked.js for Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-left">
+                <i data-lucide="book-open" class="app-logo"></i>
+                <h1>Classroom Memo</h1>
+            </div>
+            <div class="header-right">
+                <div class="search-container">
+                    <i data-lucide="search" class="search-icon"></i>
+                    <input type="text" id="search-input" placeholder="メモを検索...">
+                </div>
+                <button id="new-memo-btn" class="btn btn-primary">
+                    <i data-lucide="plus"></i>
+                    <span>新規メモ</span>
+                </button>
+            </div>
+        </header>
+
+        <main class="app-main">
+            <div id="memo-list" class="memo-list">
+                <!-- Memos will be injected here -->
+            </div>
+            <div id="empty-state" class="empty-state hidden">
+                <div class="empty-icon-container">
+                    <i data-lucide="note-text" class="empty-icon"></i>
+                </div>
+                <h3>メモがありません</h3>
+                <p>「新規メモ」ボタンから新しいメモを作成しましょう。</p>
+            </div>
+        </main>
+
+        <!-- Editor Modal -->
+        <div id="editor-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <input type="text" id="memo-title-input" placeholder="タイトルを入力..." class="title-input">
+                    <div class="modal-actions">
+                        <button id="close-modal-btn" class="btn btn-ghost">キャンセル</button>
+                        <button id="save-memo-btn" class="btn btn-primary">保存する</button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div class="editor-pane">
+                        <div class="pane-header">編集 (Markdown)</div>
+                        <textarea id="memo-content-input" placeholder="ここに入力..."></textarea>
+                    </div>
+                    <div class="preview-pane">
+                        <div class="pane-header">プレビュー</div>
+                        <div id="markdown-preview" class="markdown-body"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>
